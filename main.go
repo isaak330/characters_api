@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
 
 type Character struct {
@@ -41,16 +42,17 @@ func main() {
 	router.HandleFunc("/characters/{id}", updateCharacter(db)).Methods("PUT")
 	router.HandleFunc("/characters/{id}", deleteCharacter(db)).Methods("DELETE")
 
+	handler := cors.Default().Handler(router)
 	//start server
-	log.Fatal(http.ListenAndServe(":8000", jsonContentTypeMiddleware(router)))
+	log.Fatal(http.ListenAndServe(":8000", handler))
 }
 
-func jsonContentTypeMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		next.ServeHTTP(w, r)
-	})
-}
+// func jsonContentTypeMiddleware(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		w.Header().Set("Content-Type", "application/json")
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
 
 // get all users
 func getCharacters(db *sql.DB) http.HandlerFunc {
